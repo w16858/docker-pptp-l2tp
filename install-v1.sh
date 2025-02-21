@@ -26,7 +26,9 @@ hostname=$(hostname)
 if ! grep -q "127.0.0.1.*$hostname" /etc/hosts; then
   # 如果没有条目，添加到 /etc/hosts 文件
   echo "127.0.0.1   $hostname" | sudo tee -a /etc/hosts > /dev/null
+  
   echo "已成功将主机名 $hostname 指向 127.0.0.1"
+sudo systemctl restart systemd-hostnamed
 else
   echo "主机名 $hostname 已经指向 127.0.0.1"
 fi
@@ -49,7 +51,8 @@ sudo docker run -d --name vpn-server --privileged --net=host -v /etc/ipsec.d -v 
 
 # 启动 PPTP VPN 服务器
 echo "正在启动 PPTP VPN 服务器..."
-sudo docker run -d --privileged --net=host -v /etc/ppp/chap-secrets:/etc/ppp/chap-secrets --name pptp-vpn siomiz/pptpd
+sudo docker run -d --privileged --net=host -v /etc/ppp/chap-secrets:/etc/ppp/chap-secrets --name pptp-vpn mobtitude/vpn-pptp
+
 
 # 防火墙配置
 echo "正在配置防火墙..."
