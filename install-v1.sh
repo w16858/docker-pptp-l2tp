@@ -24,16 +24,13 @@ hostname=$(hostname)
 
 # 检查 /etc/hosts 中是否已经包含该主机名指向 127.0.0.1 的条目
 if ! grep -q "127.0.0.1.*$hostname" /etc/hosts; then
-  # 如果没有条目，添加到 /etc/hosts 文件
-  echo "127.0.0.1   $hostname" | sudo tee -a /etc/hosts > /dev/null
-  
-  echo "已成功将主机名 $hostname 指向 127.0.0.1"
-sudo systemctl restart systemd-hostnamed
+    # 如果没有条目，添加到 /etc/hosts 文件
+    echo "127.0.0.1   $hostname" | sudo tee -a /etc/hosts > /dev/null
+    echo "已成功将主机名 $hostname 指向 127.0.0.1"
+    sudo systemctl restart systemd-hostnamed
 else
-  echo "主机名 $hostname 已经指向 127.0.0.1"
+    echo "主机名 $hostname 已经指向 127.0.0.1"
 fi
-
-
 
 # 创建所需的目录和文件
 echo "正在创建所需的目录和文件..."
@@ -53,7 +50,6 @@ sudo docker run -d --name vpn-server --privileged --net=host -v /etc/ipsec.d -v 
 echo "正在启动 PPTP VPN 服务器..."
 sudo docker run -d --privileged --net=host -v /etc/ppp/chap-secrets:/etc/ppp/chap-secrets --name pptp-vpn mobtitude/vpn-pptp
 
-
 # 防火墙配置
 echo "正在配置防火墙..."
 # 检测是否使用 UFW 防火墙
@@ -68,26 +64,32 @@ fi
 # 检查 Docker 容器状态
 echo "正在检查容器状态..."
 
+# 获取并显示容器列表
+echo -e "\n当前 Docker 容器状态：\n"
+sudo docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" | tee /dev/tty | grep "Up" && GREEN='\033[0;32m' || GREEN=''
+echo -e "$GREEN"
+
 # 检查 L2TP + IPsec VPN 容器状态
 L2TP_CONTAINER_STATUS=$(sudo docker ps -f "name=vpn-server" --format "{{.Status}}")
 if [[ "$L2TP_CONTAINER_STATUS" == *"Up"* ]]; then
-    echo "L2TP + IPsec VPN 服务器正在运行..."
+    echo -e "${GREEN}L2TP + IPsec VPN 服务器正在运行...${NC}"
 else
-    echo "L2TP + IPsec VPN 服务器未启动！"
+    echo -e "\033[0;31mL2TP + IPsec VPN 服务器未启动！${NC}"
 fi
 
 # 检查 PPTP VPN 容器状态
 PPTP_CONTAINER_STATUS=$(sudo docker ps -f "name=pptp-vpn" --format "{{.Status}}")
 if [[ "$PPTP_CONTAINER_STATUS" == *"Up"* ]]; then
-    echo "PPTP VPN 服务器正在运行..."
+    echo -e "${GREEN}PPTP VPN 服务器正在运行...${NC}"
 else
-    echo "PPTP VPN 服务器未启动！"
+    echo -e "\033[0;31mPPTP VPN 服务器未启动！${NC}"
 fi
 
 # 完成提示
 echo "VPN 服务器已成功启动！"
-echo "L2TP + IPsec VPN 用户名: $VPN_USER"
-echo "L2TP + IPsec VPN 密码: $VPN_PASSWORD"
-echo "L2TP + IPsec VPN 共享密钥: $VPN_IPSEC_PSK"
-echo "PPTP VPN 用户名: $VPN_USER"
-echo "PPTP VPN 密码: $VPN_PASSWORD"
+echo -e "L2TP + IPsec VPN 用户名: $VPN_USER"
+echo -e "L2TP + IPsec VPN 密码: $VPN_PASSWORD"
+echo -e "L2TP + IPsec VPN 共享密钥: $VPN_IPSEC_PSK"
+echo -e "PPTP VPN 用户名: $VPN_USER"
+echo -e "PPTP VPN 密码: $VPN_PASSWORD"
+
