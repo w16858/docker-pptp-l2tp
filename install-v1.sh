@@ -18,6 +18,21 @@ else
     echo "Docker 已安装，跳过安装步骤。"
 fi
 
+
+# 指向主机名
+hostname=$(hostname)
+
+# 检查 /etc/hosts 中是否已经包含该主机名指向 127.0.0.1 的条目
+if ! grep -q "127.0.0.1.*$hostname" /etc/hosts; then
+  # 如果没有条目，添加到 /etc/hosts 文件
+  echo "127.0.0.1   $hostname" | sudo tee -a /etc/hosts > /dev/null
+  echo "已成功将主机名 $hostname 指向 127.0.0.1"
+else
+  echo "主机名 $hostname 已经指向 127.0.0.1"
+fi
+
+
+
 # 创建所需的目录和文件
 echo "正在创建所需的目录和文件..."
 sudo mkdir -p /etc/ppp
