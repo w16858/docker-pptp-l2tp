@@ -31,15 +31,15 @@ else
     echo "主机名 $hostname 已经指向 127.0.0.1"
 fi
 
-# 创建所需的目录和文件
-echo "正在创建所需的目录和文件..."
-sudo mkdir -p /etc/ppp
-echo "vp1 * aa123456+++ *" | sudo tee /etc/ppp/chap-secrets
-
 # 随机生成密码
 VPN_PASSWORD=$(openssl rand -base64 12)  # 生成一个12位长度的随机密码
 VPN_IPSEC_PSK="vpn"
 VPN_USER="vp1"
+
+# 创建所需的目录和文件
+echo "正在创建所需的目录和文件..."
+sudo mkdir -p /etc/ppp
+echo "vp1 * $VPN_PASSWORD *" | sudo tee /etc/ppp/chap-secrets
 
 # 启动 L2TP + IPsec VPN 服务器
 echo "正在启动 L2TP + IPsec VPN 服务器..."
@@ -97,11 +97,13 @@ echo -e "$PPTP_STATUS"
 # 如果两个容器都启动成功，保存账号密码和密钥到文件
 if [[ "$L2TP_CONTAINER_STATUS" ]] && [[ "$PPTP_CONTAINER_STATUS" ]]; then
     echo "VPN 服务器已成功启动！"
-    echo "L2TP + IPsec VPN 用户名: $VPN_USER" > /root/pptp+l2tp+pw.txt
-    echo "L2TP + IPsec VPN 密码: $VPN_PASSWORD" >> /root/pptp+l2tp+pw.txt
-    echo "L2TP + IPsec VPN 共享密钥: $VPN_IPSEC_PSK" >> /root/pptp+l2tp+pw.txt
-    echo "PPTP VPN 用户名: $VPN_USER" >> /root/pptp+l2tp+pw.txt
-    echo "PPTP VPN 密码: $VPN_PASSWORD" >> /root/pptp+l2tp+pw.txt
+    {
+        echo "L2TP + IPsec VPN 用户名: $VPN_USER"
+        echo "L2TP + IPsec VPN 密码: $VPN_PASSWORD"
+        echo "L2TP + IPsec VPN 共享密钥: $VPN_IPSEC_PSK"
+        echo "PPTP VPN 用户名: $VPN_USER"
+        echo "PPTP VPN 密码: $VPN_PASSWORD"
+    } | tee /root/pptp+l2tp+pw.txt
 else
     echo "VPN 服务器启动失败，未保存账号和密钥！"
 fi
