@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# 定义颜色
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m' # 无颜色
+
 # 检查 Docker 是否已安装
 if ! command -v docker &> /dev/null; then
     echo "Docker 未安装，正在安装 Docker..."
@@ -54,9 +59,9 @@ fi
 # 启动新容器
 L2TP_CONTAINER_STATUS=$(sudo docker run -d --name vpn-server --privileged --net=host -v /etc/ipsec.d -v /etc/ppp -e VPN_IPSEC_PSK="$VPN_IPSEC_PSK" -e VPN_USER="$VPN_USER" -e VPN_PASSWORD="$VPN_PASSWORD" hwdsl2/ipsec-vpn-server)
 if [[ "$L2TP_CONTAINER_STATUS" ]]; then
-    L2TP_STATUS="\033[0;32mL2TP + IPsec VPN 服务器正在运行...${NC}"
+    L2TP_STATUS="${GREEN}L2TP + IPsec VPN 服务器正在运行...${NC}"
 else
-    L2TP_STATUS="\033[0;31mL2TP + IPsec VPN 服务器启动失败！${NC}"
+    L2TP_STATUS="${RED}L2TP + IPsec VPN 服务器启动失败！${NC}"
 fi
 
 # 启动 PPTP VPN 服务器
@@ -71,9 +76,9 @@ fi
 # 启动新容器
 PPTP_CONTAINER_STATUS=$(sudo docker run -d --privileged --net=host -v /etc/ppp/chap-secrets:/etc/ppp/chap-secrets --name pptp-vpn mobtitude/vpn-pptp)
 if [[ "$PPTP_CONTAINER_STATUS" ]]; then
-    PPTP_STATUS="\033[0;32mPPTP VPN 服务器正在运行...${NC}"
+    PPTP_STATUS="${GREEN}PPTP VPN 服务器正在运行...${NC}"
 else
-    PPTP_STATUS="\033[0;31mPPTP VPN 服务器启动失败！${NC}"
+    PPTP_STATUS="${RED}PPTP VPN 服务器启动失败！${NC}"
 fi
 
 # 防火墙配置
@@ -98,12 +103,12 @@ echo -e "$PPTP_STATUS"
 
 # 如果两个容器都启动成功，显示账号密码和密钥
 if [[ "$L2TP_CONTAINER_STATUS" ]] && [[ "$PPTP_CONTAINER_STATUS" ]]; then
-    echo -e "\033[0;32mVPN 服务器已成功启动！${NC}"
-    echo -e "\033[0;32mL2TP + IPsec VPN 用户名: $VPN_USER${NC}"
-    echo -e "\033[0;32mL2TP + IPsec VPN 密码: $VPN_PASSWORD${NC}"
-    echo -e "\033[0;32mL2TP + IPsec VPN 共享密钥: $VPN_IPSEC_PSK${NC}"
-    echo -e "\033[0;32mPPTP VPN 用户名: $VPN_USER${NC}"
-    echo -e "\033[0;32mPPTP VPN 密码: $VPN_PASSWORD${NC}"
+    echo -e "${GREEN}VPN 服务器已成功启动！${NC}"
+    echo -e "${GREEN}L2TP + IPsec VPN 用户名: $VPN_USER${NC}"
+    echo -e "${GREEN}L2TP + IPsec VPN 密码: $VPN_PASSWORD${NC}"
+    echo -e "${GREEN}L2TP + IPsec VPN 共享密钥: $VPN_IPSEC_PSK${NC}"
+    echo -e "${GREEN}PPTP VPN 用户名: $VPN_USER${NC}"
+    echo -e "${GREEN}PPTP VPN 密码: $VPN_PASSWORD${NC}"
 else
-    echo -e "\033[0;31mVPN 服务器启动失败，未显示账号和密钥！${NC}"
+    echo -e "${RED}VPN 服务器启动失败，未显示账号和密钥！${NC}"
 fi
