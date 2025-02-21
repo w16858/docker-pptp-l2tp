@@ -68,7 +68,7 @@ if sudo docker ps -a --format '{{.Names}}' | grep -q '^pptp-vpn$'; then
 fi
 
 # 启动新容器
-PPTP_CONTAINER_STATUS=$(sudo docker run -d --privileged --net=host -v /etc/ppp/chap-secrets:/etc/ppp/chap-secrets --name pptp-vpn mobtitude/vpn-pptp)
+PPTP_CONTAINER_STATUS=$(sudo docker run -d --privileged --net=host -v /etc/ppp/chap-secrets:/etc/ppp/chap-secrets --name pptp-vpn --restart unless-stopped mobtitude/vpn-pptp)
 if [[ "$PPTP_CONTAINER_STATUS" ]]; then
     PPTP_STATUS="PPTP VPN 服务器正在运行..."
 else
