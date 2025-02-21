@@ -51,7 +51,8 @@ if sudo docker ps -a --format '{{.Names}}' | grep -q '^vpn-server$'; then
 fi
 
 # 启动新容器
-L2TP_CONTAINER_STATUS=$(sudo docker run -d --name vpn-server --privileged --net=host -v /etc/ipsec.d -v /etc/ppp -e VPN_IPSEC_PSK="$VPN_IPSEC_PSK" -e VPN_USER="$VPN_USER" -e VPN_PASSWORD="$VPN_PASSWORD" hwdsl2/ipsec-vpn-server)
+L2TP_CONTAINER_STATUS=$(sudo docker run -d --name vpn-server --privileged --net=host -v /etc/ipsec.d -v /etc/ppp -e VPN_IPSEC_PSK="$VPN_IPSEC_PSK" -e VPN_USER="$VPN_USER" -e VPN_PASSWORD="$VPN_PASSWORD" --restart unless-stopped hwdsl2/ipsec-vpn-server)
+
 if [[ "$L2TP_CONTAINER_STATUS" ]]; then
     L2TP_STATUS="L2TP + IPsec VPN 服务器正在运行..."
 else
